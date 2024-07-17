@@ -1,0 +1,25 @@
+@charset "UTF-8";
+body {
+	margin: 0;
+	padding: 0;
+}
+.block {
+	background: aliceblue;
+	height: 200px;
+}
+.system-btn-wrapper {
+	position: relative;
+	height: 200px; /* 버튼이 고정에서 상대 위치로 변경되는 지점 */
+}
+.system_btn {
+	height: 200px;
+	background-color: #007bff;
+}
+.system_btn.move {
+	position: fixed;
+	width: 100%;
+	height: 200px;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+}
