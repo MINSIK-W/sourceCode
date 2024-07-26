@@ -1,54 +1,63 @@
 document.addEventListener('DOMContentLoaded', function () {
-  orderInImageList('.inner');
+  initializeImageOrder('.inner');
 });
 
-function orderInImageList(sel, opts = {}) {
-  const defs = {
-    numName: 'num',
-    startNum: 1,
+function initializeImageOrder(selector, options = {}) {
+  const defaultOptions = {
+    numberClassName: 'num',
+    startNumber: 1,
   };
-  const set = Object.assign({}, defs, opts);
-  let om = new Map();
-  let sn = set.startNum;
+  const settings = Object.assign({}, defaultOptions, options);
+  const orderMap = new Map();
+  let currentNumber = settings.startNumber;
 
-  document.querySelector(sel).addEventListener('click', function (event) {
-    if (event.target.closest('.item')) {
-      const item = event.target.closest('.item');
-      const idx = Array.from(item.parentNode.children).indexOf(item);
-      const eo = item.querySelector('.' + set.numName);
+  document.querySelector(selector).addEventListener('click', function (event) {
+    const clickedItem = event.target.closest('.item');
+    if (clickedItem) {
+      const itemIndex = Array.from(clickedItem.parentNode.children).indexOf(clickedItem);
+      const numberElement = clickedItem.querySelector('.' + settings.numberClassName);
 
-      if (eo) {
-        const rmNum = parseInt(eo.textContent);
-        om.delete(idx);
-        eo.remove();
-        item.classList.remove('active');
-        om.forEach((val, key) => {
-          if (val > rmNum) {
-            om.set(key, val - 1);
-          }
-        });
+      if (numberElement) {
+        removeNumber(itemIndex, numberElement, clickedItem);
       } else {
-        const omsn = om.size + sn;
-        om.set(idx, omsn);
-        const span = document.createElement('span');
-        span.className = set.numName;
-        span.textContent = omsn;
-        item.appendChild(span);
-        item.classList.add('active');
+        addNumber(itemIndex, clickedItem);
       }
-      update();
+      updateNumbers();
     }
   });
 
-  function update() {
-    let omsn = om.size + sn;
-    const se = Array.from(om.entries()).sort((a, b) => a[1] - b[1]);
-    se.forEach(([idx, omsn]) => {
-      om.set(idx, omsn);
-      const item = document.querySelector(sel + ' .item:nth-child(' + (idx + 1) + ')');
-      const numSpan = item.querySelector('.' + set.numName);
-      if (numSpan) numSpan.textContent = omsn;
-      omsn++;
+  function removeNumber(index, element, item) {
+    const removedNumber = parseInt(element.textContent);
+    orderMap.delete(index);
+    element.remove();
+    item.classList.remove('active');
+
+    orderMap.forEach((value, key) => {
+      if (value > removedNumber) {
+        orderMap.set(key, value - 1);
+      }
+    });
+  }
+
+  function addNumber(index, item) {
+    const newNumber = orderMap.size + currentNumber;
+    orderMap.set(index, newNumber);
+
+    const span = document.createElement('span');
+    span.className = settings.numberClassName;
+    span.textContent = newNumber;
+
+    item.appendChild(span);
+    item.classList.add('active');
+  }
+
+  function updateNumbers() {
+    const sortedEntries = Array.from(orderMap.entries()).sort((a, b) => a[1] - b[1]);
+    sortedEntries.forEach(([index, number], i) => {
+      orderMap.set(index, i + currentNumber);
+      const item = document.querySelector(`${selector} .item:nth-child(${index + 1})`);
+      const numberSpan = item.querySelector('.' + settings.numberClassName);
+      if (numberSpan) numberSpan.textContent = i + currentNumber;
     });
   }
 }
